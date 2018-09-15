@@ -19,43 +19,46 @@ from facenet.packages import facenet, detect_face
 #    match_threshold=0.2
 #    img_path = './test_images/test0.jpg'
 #    frame = cv2.imread(img_path,0)
+mypath = os.path.dirname(__file__)
+modeldir =  mypath + '/model'
+classifier_filename = mypath + '/classifier/classifier.pkl'
+npy=''
+
+graph = tf.Graph()
+with graph.as_default():  
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
+    sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
+    with sess.as_default():
+        pnet, rnet, onet = detect_face.create_mtcnn(sess, npy)
+
+        minsize = 20  # minimum size of face
+        threshold = [0.6, 0.7, 0.7]  # three steps's threshold
+        factor = 0.709  # scale factor
+        image_size = 182
+        input_image_size = 160
+            
+
+#   print('Loading feature extraction model')
+        facenet.load_model(modeldir)
+
+        images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
+        embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
+        phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
+        embedding_size = embeddings.get_shape()[1]
+
+
+        classifier_filename_exp = os.path.expanduser(classifier_filename)
+        with open(classifier_filename_exp, 'rb') as infile:
+            (model, HumanNames) = pickle.load(infile)
+
+        HumanNames.pop()
 
 ##when passed an image frame (numpy array or cv::Mat format), this function detects faces and attempts to classify them
 def test_image(frame, match_threshold=0.2):
-    mypath = os.path.dirname(__file__)
-    modeldir =  mypath + '/model'
-    classifier_filename = mypath + '/classifier/classifier.pkl'
-    npy=''
-
-    with tf.Graph().as_default():
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
-        sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
+    
+    with graph.as_default():  
         with sess.as_default():
-            pnet, rnet, onet = detect_face.create_mtcnn(sess, npy)
-
-            minsize = 20  # minimum size of face
-            threshold = [0.6, 0.7, 0.7]  # three steps's threshold
-            factor = 0.709  # scale factor
-            image_size = 182
-            input_image_size = 160
-            
-
-#            print('Loading feature extraction model')
-            facenet.load_model(modeldir)
-
-            images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
-            embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
-            phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
-            embedding_size = embeddings.get_shape()[1]
-
-
-            classifier_filename_exp = os.path.expanduser(classifier_filename)
-            with open(classifier_filename_exp, 'rb') as infile:
-                (model, HumanNames) = pickle.load(infile)
-
-            HumanNames.pop()
-
-#            print('Start Recognition!')
+            #print('Start Recognition!')
 
             find_results = []
             result_names = []
