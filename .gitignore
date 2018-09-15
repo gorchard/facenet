@@ -1,0 +1,5 @@
+__pycache__
+/classifier/
+/model/
+/train_images/
+/pre_images/
