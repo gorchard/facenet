@@ -4,13 +4,13 @@ from __future__ import print_function
 
 import sys
 import os
-mypath = os.path.dirname(__file__)
+
 
 from packages.classifier import training
 
-datadir = mypath + '/pre_images'
-modeldir = mypath + '/model'
-classifier_dir = mypath + '/classifier';
+datadir = './pre_images'
+modeldir =  './model'
+classifier_dir = './classifier';
 try:
 	os.mkdir(classifier_dir)
 except OSError:
